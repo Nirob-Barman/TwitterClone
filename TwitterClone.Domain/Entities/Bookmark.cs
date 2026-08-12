@@ -3,12 +3,14 @@ namespace TwitterClone.Domain.Entities
 {
     public class Bookmark
     {
+        private Guid _id;
         private Guid _userId;
         private Guid _tweetId;
         private DateTime _bookmarkedAt;
 
         public Bookmark(Guid userId, Guid tweetId)
         {
+            _id = Guid.NewGuid();
             _userId = userId;
             _tweetId = tweetId;
             _bookmarkedAt = DateTime.UtcNow;
