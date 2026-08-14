@@ -1,26 +1,22 @@
 ﻿namespace TwitterClone.Domain.Entities
 {
-    public class Tweet
+    public class Tweet : BaseEntity
     {
-        private Guid _id;
-        private Guid _authorId;
+        private Guid _userId;
         private string _content;
 
-        public Tweet(Guid authorId, string content)
+
+        public Tweet(string content) : base(Guid.NewGuid())
         {
-            _id = Guid.NewGuid();
-            _authorId = authorId;
             _content = content;
         }
 
-        public Guid Id
+        public Guid UserId
         {
-            get { return _id; }
+            get { return _userId; }
+            set { _userId = value; }
         }
-        public Guid AuthorId
-        {
-            get { return _authorId; }
-        }
+
         public string Content
         {
             get { return _content; }
