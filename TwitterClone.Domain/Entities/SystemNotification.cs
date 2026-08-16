@@ -12,5 +12,10 @@ namespace TwitterClone.Domain.Entities
         {
             Message = message;
         }
+
+        public override string DescribeRecord()
+        {
+            return base.DescribeRecord();
+        }
     }
 }

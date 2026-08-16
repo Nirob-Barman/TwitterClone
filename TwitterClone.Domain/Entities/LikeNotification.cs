@@ -15,5 +15,11 @@ namespace TwitterClone.Domain.Entities
         {
             Message = message;
         }
+
+        public override string DescribeRecord()
+        {
+            var baseRecord = base.DescribeRecord();
+            return $"BaseRecord: {baseRecord} - Notification Type: {Type}, Message: {Message}, IsRead: {IsRead}, LikeByUserId: {LikeByUserId}";
+        }
     }
 }
