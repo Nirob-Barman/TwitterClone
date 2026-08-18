@@ -38,5 +38,7 @@ namespace TwitterClone.Domain.Entities
             get { return _isRead; }
             set { _isRead = value; }
         }
+
+        public abstract string GetMessage();
     }
 }

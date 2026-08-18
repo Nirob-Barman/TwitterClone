@@ -15,5 +15,10 @@ namespace TwitterClone.Domain.Entities
             var baseRecord = base.DescribeRecord();
             return $"{baseRecord}, MentionedByUserId: {MentionedByUserId}";
         }
+
+        public override string GetMessage()
+        {
+            return $"User with ID {MentionedByUserId} mentioned you in a post.";
+        }
     }
 }
