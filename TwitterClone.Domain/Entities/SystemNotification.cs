@@ -12,5 +12,15 @@ namespace TwitterClone.Domain.Entities
         {
             Message = message;
         }
+
+        public override string DescribeRecord()
+        {
+            return base.DescribeRecord();
+        }
+
+        public override string GetMessage()
+        {
+            return $"System Notification: Unknown Error";
+        }
     }
 }
