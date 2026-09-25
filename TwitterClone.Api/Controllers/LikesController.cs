@@ -6,45 +6,67 @@ namespace TwitterClone.Api.Controllers
     [ApiController]
     public class LikesController : ControllerBase
     {
-        // POST: api/likes/{tweetId}
-        [HttpPost("{tweetId}")]
-        public IActionResult LikeTweet(int tweetId)
+        public LikesController() { }
+
+
+        // GET /api/likes?userId={userId}&tweetId={tweetId}
+        [HttpGet]
+        public IActionResult GetLikes([FromQuery] Guid? userId, [FromQuery] Guid? tweetId)
         {
-            return Ok(new
+            return Ok(new List<object>
             {
-                message = "Tweet liked successfully."
+                new
+                {
+                    LikeId = Guid.NewGuid(),
+                    UserId = userId ?? Guid.NewGuid(),
+                    TweetId = tweetId ?? Guid.NewGuid(),
+                    CreatedAt = DateTime.UtcNow.AddMinutes(-30),
+                },
+                new
+                {
+                    LikeId = Guid.NewGuid(),
+                    UserId = userId ?? Guid.NewGuid(),
+                    TweetId = tweetId ?? Guid.NewGuid(),
+                    CreatedAt = DateTime.UtcNow.AddMinutes(-10),
+                },
             });
         }
 
-        // DELETE: api/likes/{tweetId}
-        [HttpDelete("{tweetId}")]
-        public IActionResult UnlikeTweet(int tweetId)
+        // GET /api/likes/{id}
+        [HttpGet("{id}")]
+        public IActionResult GetLikeById([FromRoute] Guid id)
         {
             return Ok(new
             {
-                message = "Tweet unliked successfully."
+                LikeId = id,
+                UserId = Guid.NewGuid(),
+                TweetId = Guid.NewGuid(),
+                CreatedAt = DateTime.UtcNow,
             });
         }
 
-        // GET: api/likes/{tweetId}/status
-        [HttpGet("{tweetId}/status")]
-        public IActionResult GetLikeStatus(int tweetId)
+        // POST /api/likes
+        [HttpPost]
+        public IActionResult CreateLike()
         {
-            return Ok();
+            return Ok(new
+            {
+                LikeId = Guid.NewGuid(),
+                UserId = Guid.NewGuid(),
+                TweetId = Guid.NewGuid(),
+                CreatedAt = DateTime.UtcNow,
+            });
         }
 
-        // GET: api/likes/{tweetId}/count
-        [HttpGet("{tweetId}/count")]
-        public IActionResult GetLikeCount(int tweetId)
+        // DELETE /api/likes/{id}
+        [HttpDelete("{id}")]
+        public IActionResult DeleteLike([FromRoute] Guid id)
         {
-            return Ok();
-        }
-
-        // GET: api/likes/user/{userId}
-        [HttpGet("user/{userId}")]
-        public IActionResult GetLikedTweets(int userId)
-        {
-            return Ok();
+            return Ok(new
+            {
+                LikeId = id,
+                Message = "Like removed successfully.",
+            });
         }
     }
 }

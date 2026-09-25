@@ -5,47 +5,87 @@ namespace TwitterClone.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ReTweetsController : ControllerBase
+    public class RetweetsController : ControllerBase
     {
-        // POST: api/retweets/{tweetId}
-        [HttpPost("{tweetId}")]
-        public IActionResult Retweet(int tweetId)
+        public RetweetsController() { }
+
+
+        // GET /api/retweets?userId={userId}&tweetId={tweetId}
+        [HttpGet]
+        public IActionResult GetRetweets([FromQuery] Guid? userId, [FromQuery] Guid? tweetId)
         {
-            return Ok(new
+            return Ok(new List<object>
             {
-                message = "Tweet retweeted successfully."
+                new
+                {
+                    RetweetId = Guid.NewGuid(),
+                    UserId = userId ?? Guid.NewGuid(),
+                    TweetId = tweetId ?? Guid.NewGuid(),
+                    Comment = "Great point!",
+                    CreatedAt = DateTime.UtcNow.AddHours(-3),
+                },
+                new
+                {
+                    RetweetId = Guid.NewGuid(),
+                    UserId = userId ?? Guid.NewGuid(),
+                    TweetId = tweetId ?? Guid.NewGuid(),
+                    Comment = "",
+                    CreatedAt = DateTime.UtcNow.AddHours(-1),
+                },
             });
         }
 
-        // DELETE: api/retweets/{tweetId}
-        [HttpDelete("{tweetId}")]
-        public IActionResult RemoveRetweet(int tweetId)
+        // GET /api/retweets/{id}
+        [HttpGet("{id}")]
+        public IActionResult GetRetweetById([FromRoute] Guid id)
         {
             return Ok(new
             {
-                message = "Retweet removed successfully."
+                RetweetId = id,
+                UserId = Guid.NewGuid(),
+                TweetId = Guid.NewGuid(),
+                Comment = "retweet" + id.ToString(),
+                CreatedAt = DateTime.UtcNow,
             });
         }
 
-        // GET: api/retweets/{tweetId}/status
-        [HttpGet("{tweetId}/status")]
-        public IActionResult GetRetweetStatus(int tweetId)
+        // POST /api/retweets
+        [HttpPost]
+        public IActionResult CreateRetweet()
         {
-            return Ok();
+            return Ok(new
+            {
+                RetweetId = Guid.NewGuid(),
+                UserId = Guid.NewGuid(),
+                TweetId = Guid.NewGuid(),
+                Comment = "New retweet comment.",
+                CreatedAt = DateTime.UtcNow,
+            });
         }
 
-        // GET: api/retweets/{tweetId}/count
-        [HttpGet("{tweetId}/count")]
-        public IActionResult GetRetweetCount(int tweetId)
+        // PUT /api/retweets/{id}
+        [HttpPut("{id}")]
+        public IActionResult UpdateRetweet([FromRoute] Guid id)
         {
-            return Ok();
+            return Ok(new
+            {
+                RetweetId = id,
+                UserId = Guid.NewGuid(),
+                TweetId = Guid.NewGuid(),
+                Comment = "updatedcomment" + id.ToString(),
+                ModifiedAt = DateTime.UtcNow,
+            });
         }
 
-        // GET: api/retweets/user/{userId}
-        [HttpGet("user/{userId}")]
-        public IActionResult GetUserRetweets(int userId)
+        // DELETE /api/retweets/{id}
+        [HttpDelete("{id}")]
+        public IActionResult DeleteRetweet([FromRoute] Guid id)
         {
-            return Ok();
+            return Ok(new
+            {
+                RetweetId = id,
+                Message = "Retweet removed successfully.",
+            });
         }
     }
 }
