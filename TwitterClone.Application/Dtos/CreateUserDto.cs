@@ -1,6 +1,6 @@
-﻿namespace TwitterClone.Api.Dtos
+﻿namespace TwitterClone.Application.Dtos
 {
-    public class CreateUserRequest
+    public class CreateUserDto
     {
         public required string FirstName { get; set; }        
         public required string LastName { get; set; }

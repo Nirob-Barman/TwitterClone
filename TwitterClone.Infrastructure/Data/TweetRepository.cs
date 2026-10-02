@@ -1,8 +1,9 @@
-﻿using TwitterClone.Domain.Entities;
+﻿using TwitterClone.Application.Interfaces;
+using TwitterClone.Domain.Entities;
 
-namespace TwitterClone.Api.Data
+namespace TwitterClone.Infrastructure.Data
 {
-    public class TweetRepository
+    public class TweetRepository : ITweetRepository
     {
         private readonly List<Tweet> _tweets = new List<Tweet>();
 
