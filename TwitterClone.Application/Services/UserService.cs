@@ -1,5 +1,6 @@
 ﻿using TwitterClone.Application.Dtos;
 using TwitterClone.Application.Interfaces;
+using TwitterClone.Application.Mappings;
 using TwitterClone.Domain.Entities;
 
 namespace TwitterClone.Application.Services
@@ -7,113 +8,61 @@ namespace TwitterClone.Application.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly ITweetRepository _tweetRepository;
+        private readonly ITweetService _tweetService;
+        private readonly ILikeRepository _likeRepository;
+        private readonly IBookmarkRepository _bookmarkRepository;
+        private readonly IRetweetRepository _retweetRepository;
+        private readonly IFollowRepository _followRepository;
+        private readonly IMessageRepository _messageRepository;
+        private readonly INotificationRepository _notificationRepository;
 
-        public UserService(IUserRepository userRepository)
+        public UserService(
+            IUserRepository userRepository,
+            ITweetRepository tweetRepository,
+            ITweetService tweetService,
+            ILikeRepository likeRepository,
+            IBookmarkRepository bookmarkRepository,
+            IRetweetRepository retweetRepository,
+            IFollowRepository followRepository,
+            IMessageRepository messageRepository,
+            INotificationRepository notificationRepository)
         {
             _userRepository = userRepository;
-        }
-        public List<UserDto> GetUsers()
-        {
-            var users = _userRepository.GetUsers();
-
-            return users.Select(user => new UserDto
-            {
-                Id = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email
-            }).ToList();
+            _tweetRepository = tweetRepository;
+            _tweetService = tweetService;
+            _likeRepository = likeRepository;
+            _bookmarkRepository = bookmarkRepository;
+            _retweetRepository = retweetRepository;
+            _followRepository = followRepository;
+            _messageRepository = messageRepository;
+            _notificationRepository = notificationRepository;
         }
 
-        public UserDto? GetUserById(Guid id)
+        public UserDto? CreateUser(CreateUserDto createUserDto)
         {
-            var user = _userRepository.GetUserById(id);
-
-            if (user == null)
+            if (string.IsNullOrWhiteSpace(createUserDto.FirstName) ||
+               string.IsNullOrWhiteSpace(createUserDto.LastName) ||
+               string.IsNullOrWhiteSpace(createUserDto.Email))
             {
                 return null;
             }
 
-            return new UserDto
-            {
-                Id = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email
-            };
-        }
-
-        public UserDto? GetUserByEmail(string email)
-        {
-            var user = _userRepository.GetUserByEmail(email);
-
-            if (user == null)
-            {
-                return null;
-            }
-
-            return new UserDto
-            {
-                Id = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email
-            };
-        }
-
-        public UserDto CreateUser(CreateUserDto request)
-        {
-            if (string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.LastName) || string.IsNullOrWhiteSpace(request.Email))
-            {
-                return null!;
-            }
-
-            var existingUser = _userRepository.GetUserByEmail(request.Email);
+            var existingUser = _userRepository.GetUserByEmail(createUserDto.Email);
 
             if (existingUser != null)
             {
-                return null!;
+                return null;
             }
 
-            var user = new User
+            var createdUser = _userRepository.AddUser(new User()
             {
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                Email = request.Email
-            };
+                FirstName = createUserDto.FirstName.Trim(),
+                LastName = createUserDto.LastName.Trim(),
+                Email = createUserDto.Email.Trim()
+            });
 
-            _userRepository.AddUser(user);
-
-            return new UserDto
-            {
-                Id = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email
-            };
-        }
-
-        public UserDto UpdateUser(Guid id, UpdateUserDto request)
-        {
-            var user = _userRepository.GetUserById(id);
-
-            if (user == null)
-            {
-                return null!;
-            }
-
-            user.FirstName = request.FirstName;
-            user.LastName = request.LastName;
-
-            _userRepository.UpdateUser(user);
-
-            return new UserDto
-            {
-                Id = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email
-            };
+            return createdUser.ToDto();
         }
 
         public bool DeleteUser(Guid id)
@@ -125,7 +74,72 @@ namespace TwitterClone.Application.Services
                 return false;
             }
 
+            // A user's tweets can't outlive the user. Going through the tweet service
+            // also removes the likes, bookmarks and retweets other users left on them.
+            foreach (var tweet in _tweetRepository.GetTweetsByUserId(id))
+            {
+                _tweetService.DeleteTweet(tweet.Id);
+            }
+
+            // Neither can the user's own activity and relationships.
+            _likeRepository.DeleteLikesByUserId(id);
+            _bookmarkRepository.DeleteBookmarksByUserId(id);
+            _retweetRepository.DeleteRetweetsByUserId(id);
+            _followRepository.DeleteFollowsByUserId(id);
+            _messageRepository.DeleteMessagesByUserId(id);
+            _notificationRepository.DeleteNotificationsByUserId(id);
+
             return _userRepository.DeleteUser(user);
+        }
+
+        public UserDto? GetUserById(Guid id)
+        {
+            var user = _userRepository.GetUserById(id);
+
+            return user?.ToDto();
+        }
+
+        public List<UserDto> GetUsers()
+        {
+            return _userRepository.GetUsers()
+                .OrderBy(u => u.CreatedAt)
+                .Select(u => u.ToDto())
+                .ToList();
+        }
+
+        public UserDto? UpdateUser(Guid id, UpdateUserDto updateUserDto)
+        {
+            var user = _userRepository.GetUserById(id);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            user.FirstName = updateUserDto.FirstName.Trim();
+            user.LastName = updateUserDto.LastName.Trim();
+            user.MarkAsModified();
+
+            _userRepository.UpdateUser(user);
+
+            return user.ToDto();
+        }
+
+        public UserDto? UpdateUserPhoneNumber(Guid id, string phoneNumber)
+        {
+            var user = _userRepository.GetUserById(id);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            user.PhoneNumber = phoneNumber.Trim();
+            user.MarkAsModified();
+
+            _userRepository.UpdateUser(user);
+
+            return user.ToDto();
         }
     }
 }

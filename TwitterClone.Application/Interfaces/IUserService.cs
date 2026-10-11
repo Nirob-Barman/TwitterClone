@@ -4,11 +4,11 @@ namespace TwitterClone.Application.Interfaces
 {
     public interface IUserService
     {
-        UserDto? CreateUser(CreateUserDto request);
-        List<UserDto> GetUsers();
+        UserDto? CreateUser(CreateUserDto createUserDto);
         UserDto? GetUserById(Guid id);
-        UserDto? GetUserByEmail(string email);
-        UserDto? UpdateUser(Guid id, UpdateUserDto request);
+        UserDto? UpdateUser(Guid id, UpdateUserDto updateUserDto);
+        UserDto? UpdateUserPhoneNumber(Guid id, string phoneNumber);
         bool DeleteUser(Guid id);
+        List<UserDto> GetUsers();
     }
 }

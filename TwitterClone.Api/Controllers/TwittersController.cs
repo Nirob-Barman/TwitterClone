@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace TwitterClone.Api.Controllers
 {
@@ -9,37 +8,32 @@ namespace TwitterClone.Api.Controllers
     {
         private readonly IConfiguration _configuration;
 
-        public TwittersController(IConfiguration configuration)
+        public TwittersController(
+            IConfiguration configuration)
         {
             _configuration = configuration;
         }
 
-
-        [HttpGet("tweets")]
+        [HttpGet]
         public IActionResult GetTweets()
         {
-            var maxTweetLength = _configuration.GetValue<int>("TwitterSettings:MaxTweetLength");
-
-            var response = new
+            var tweets = new List<object>
             {
-                maxLenth = maxTweetLength,
-                tweets = new[]
+                new
                 {
-                    new { Id = 1, Text = "Exploring Web API development with ASP.NET Core" },
-                    new { Id = 2, Text = "Learning how to build RESTful APIs using C#" }
-
-                }
+                    UserId = Guid.NewGuid(),
+                    Content = "Hello, world!",
+                },
+                new
+                {
+                    UserId = Guid.NewGuid(),
+                    Content = "This is my second tweet.",
+                },
             };
 
-            return Ok(response);
+            return Ok(tweets);
         }
-
-        [HttpGet("app-info")]
-        public IActionResult GetAppInfo()
-        {
-            var appName = _configuration.GetValue<string>("AppName");
-            return Ok(new { AppName = appName });
-        }
-
     }
 }
+
+
