@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TwitterClone.Application.Interfaces;
+using TwitterClone.Infrastructure.Auth;
 using TwitterClone.Infrastructure.Persistence;
 using TwitterClone.Infrastructure.Repositories;
 
@@ -12,7 +13,7 @@ namespace TwitterClone.Infrastructure
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
 
-            var connectionString = configuration.GetConnectionString("TwitterCloneDb")
+            var connectionString = configuration.GetConnectionString("DefaultConnection")
                 ?? throw new InvalidOperationException("Connection string 'TwitterCloneDb' is missing.");
 
             // Registers TwitterCloneDbContext as scoped: one context per HTTP request.
@@ -27,6 +28,9 @@ namespace TwitterClone.Infrastructure
             services.AddScoped<IMessageRepository, MessageRepository>();
             services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<IRetweetRepository, RetweetRepository>();
+
+            services.AddScoped<ITokenService, JwtTokenService>();
+            services.AddScoped<IPasswordHasher, PasswordHasher>();
 
             return services;
         }
